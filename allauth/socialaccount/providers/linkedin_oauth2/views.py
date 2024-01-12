@@ -13,7 +13,7 @@ class LinkedInOAuth2Adapter(OAuth2Adapter):
     provider_id = LinkedInOAuth2Provider.id
     access_token_url = "https://www.linkedin.com/oauth/v2/accessToken"
     authorize_url = "https://www.linkedin.com/oauth/v2/authorization"
-    profile_url = "https://api.linkedin.com/v2/me"
+    profile_url = "https://api.linkedin.com/v2/userinfo"
     email_url = "https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))"  # noqa
     # See:
     # http://developer.linkedin.com/forum/unauthorized-invalid-or-expired-token-immediately-after-receiving-oauth2-token?page=1 # noqa
@@ -24,8 +24,6 @@ class LinkedInOAuth2Adapter(OAuth2Adapter):
         return self.get_provider().sociallogin_from_response(request, extra_data)
 
     def get_user_info(self, token):
-        fields = self.get_provider().get_profile_fields()
-
         headers = {}
         headers.update(self.get_provider().get_settings().get("HEADERS", {}))
         headers["Authorization"] = " ".join(["Bearer", token.token])
@@ -42,7 +40,7 @@ class LinkedInOAuth2Adapter(OAuth2Adapter):
             if resp.ok:
                 info = resp.json()
 
-        url = self.profile_url + "?projection=(%s)" % ",".join(fields)
+        url = self.profile_url
         resp = get_adapter().get_requests_session().get(url, headers=headers)
         resp.raise_for_status()
         info.update(resp.json())

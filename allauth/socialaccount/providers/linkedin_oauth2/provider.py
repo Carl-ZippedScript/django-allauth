@@ -111,12 +111,12 @@ class LinkedInOAuth2Provider(OAuth2Provider):
     account_class = LinkedInOAuth2Account
 
     def extract_uid(self, data):
-        if "id" not in data:
+        if "sub" not in data:
             raise ProviderException(
                 "LinkedIn encountered an internal error while logging in. \
                 Please try again."
             )
-        return str(data["id"])
+        return str(data["sub"])
 
     def get_profile_fields(self):
         default_fields = [
@@ -140,9 +140,9 @@ class LinkedInOAuth2Provider(OAuth2Provider):
 
     def extract_common_fields(self, data):
         return dict(
-            first_name=_extract_name_field(data, "firstName"),
-            last_name=_extract_name_field(data, "lastName"),
-            email=_extract_email(data),
+            first_name=data.get('given_name', ''),
+            last_name=data.get('family_name', ''),
+            email=data.get('email', '')
         )
 
 
